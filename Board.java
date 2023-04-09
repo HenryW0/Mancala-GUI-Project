@@ -1,12 +1,13 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
  * Solution for Model Class in MVC pattern for Mancala Project 
- * @author Henry Wahhab
- * @version 1.0 4/6/23
+ * @author Gary Crabtree and Henry Wahhab
+ * @version 1.0 4/8/23
  */
 
 /**
@@ -18,13 +19,19 @@ public class Board {
 	public static final int MANCALA_A = 6;
 	public static final int MANCALA_B = 13;
 	
+	public static final int[] PITS_A = {0, 1, 2, 3, 4, 5};
+	public static final int[] PITS_B = {7, 8, 9, 10, 11, 12};
+	
 	private int[] arr; //In the form of [A1, A2, A3, A4, A5, A6, Mancala A, B1, B2, B3, B4, B5, B6, Mancala B]
+	private int[] prevArray; //Copy of the previous turn of the board
 	private ArrayList<ChangeListener> listeners;
+	private char player;
 	
 	public Board(int beads)
 	{
 		arr = new int[14];
-				
+		player = 'A'; //First player is Player A
+		
 		for (int i = 0; i < arr.length; i ++)
 		{
 			arr[i] = beads;
@@ -33,23 +40,86 @@ public class Board {
 		arr[MANCALA_A] = 0;
 		arr[MANCALA_B] = 0;
 		
+		prevArray = null;
+		
 		listeners = new ArrayList<ChangeListener>();
 	}
 	
-	//Accessor
+	//Accessors
+	
+	/**
+	 * Returns whole board array
+	 * @return
+	 */
 	public int[] getBoard()
 	{
 		return arr;
 	}
 	
-	//Mutator
-	public void playTurn(int index, char p)
+	/**
+	 * Returns the board from the previous turn
+	 * @return
+	 */
+	public int[] getPreviousBoard()
+	{
+		return prevArray;
+	}
+	
+	/**
+	 * Returns the current player
+	 * @return
+	 */
+	public char getCurrPlayer()
+	{
+		return player;
+	}
+	
+	/**
+	 * Returns the character referring to the next player
+	 * @return
+	 */
+	public char nextPlayer()
+	{
+		if (player == 'A') {return 'B';}
+		
+		else {return 'A';} //if player == 'B'
+	}
+	
+	/**
+	 * Returns the index of the mancala pit corresponding to the player character parameter
+	 * @param c
+	 * @return
+	 */
+	public int getPlayerPit(char c)
+	{
+		if (c == 'A') {return MANCALA_A;}
+		
+		else {return MANCALA_B;} //if c = 'B'
+	}
+	
+	/**
+	 * Returns the indices of all pits on that side of this player
+	 * @param index
+	 */
+	public int[] getPlayerSide(char c)
+	{
+		if (c == 'A') {return PITS_A;}
+		
+		else {return PITS_B;} //if c = 'B'
+	}
+	
+	
+	//Mutators
+	
+	public void playTurn(int index)
 	{	
 		try 
 		{
+			System.out.println(getCurrPlayer());
+		
+			prevArray = Arrays.copyOf(arr, arr.length); //For undo functionality
 			int total = arr[index];
 			arr[index] = 0;
-			int player;
 			
 			if (index == MANCALA_A || index == MANCALA_B)
 			{
@@ -60,30 +130,39 @@ public class Board {
 			{
 				throw new Exception("No beads in pit.");
 			}
-
-			if (p == 'A')
+			
+			if (!contains(getPlayerSide(player), index))
 			{
-				player = MANCALA_B;
+				throw new Exception("Cannot choose a pit on your opponents side.");
 			}
 				
-			else if (p == 'B') 
-			{
-				player = MANCALA_A;
-			}
-				
-			else
-			{
-				throw new Exception("Not a valid player.");
-			}
-				
-			int currIndex = index + 1;
+			int currIndex = index + 1; 
 			
 			for (int beads = 0; beads < total; currIndex ++)
 			{
-				if (currIndex % arr.length == player)
+				if (currIndex % arr.length == getPlayerPit(nextPlayer()))
 				{
-					total ++;
 					continue;
+				}
+
+				//Last Bead of Turn
+				if (beads == total - 1) //Can be optimized if this is removed from the for loop since it is checking for the last bead every single time
+				{
+					//Free Turn Functionality
+					if (currIndex == getPlayerPit(player))
+					{
+						player = nextPlayer(); //Call next player since it will be called again after the method ends to return back to this player
+					}
+					
+					//Empty Mancala Pit for Last Bead Rule
+					else if (contains(getPlayerSide(player), currIndex) && arr[currIndex % arr.length] == 0) //If the last stone dropped is empty AND on your side
+					{
+						//Put all beads on the opposite player's side into this pit
+						int opIndex = (12 - currIndex) % arr.length;
+						arr[currIndex % arr.length] += arr[opIndex];
+						arr[opIndex] = 0;
+						beads ++;
+					}
 				}
 				
 				arr[currIndex % arr.length] += 1; 
@@ -94,8 +173,15 @@ public class Board {
 		catch (Exception e)
 		{
 			System.out.println(e.getMessage());
+			System.out.println();
 		}
 		
+		
+		if(gameOver()){
+            winner();
+        }
+		
+		player = nextPlayer(); //When undoing a turn, might have to call this again
 		update();
 	}
 	
@@ -119,6 +205,90 @@ public class Board {
 		}
 	}
 	
+	/**
+	 * Determines if the game is over based on the rules and current board, if so adds remaining stones to where they belong
+	 * @return
+	 */
+	public boolean gameOver(){
+        boolean returnValue = false;
+        int A = 0;
+        int B = 0;
+        
+        //add remaining stones in A side
+        for (int i = 0; i < MANCALA_A; i++)
+        {
+            A += arr[i];
+        }
+
+        //add remaining stones in B side
+        for (int i = 7; i < MANCALA_B; i++)
+        {
+            B += arr[i];
+        }
+
+        //Figure out if game has ended and add corresponding beads to player pit
+        if (A == 0)
+        {
+            returnValue = true;
+            arr[MANCALA_B] += B;
+            
+            for(int i = 7; i < MANCALA_B; i++)
+            {
+                arr[i] = 0;
+            }
+        }
+        
+        else if (B == 0)
+        {
+            returnValue = true;
+            arr[MANCALA_A] += A;
+            
+            for(int i = 0; i < MANCALA_A; i++)
+            {
+                arr[i] = 0;
+            }
+        }
+
+        return returnValue;
+    }
+	
+	private char winner()
+	{
+		if(arr[MANCALA_A] > arr[MANCALA_B])
+		{
+			System.out.println("Player A has won!");
+			return 'A';
+		}
+            
+        else if (arr[MANCALA_A] < arr[MANCALA_B])
+        {
+        	System.out.println("Player B has won!");
+        	return 'B';
+        }   
+        	
+        else
+        {
+        	System.out.println("Tie!");
+        	return 'T';
+        }
+	}
+	
+	
+	/**
+	 * Helper method to check if an array contains a certain value
+	 * @param a
+	 * @param v
+	 * @return
+	 */
+	private static boolean contains(int[] a, int v)
+	{
+		for (int n : a)
+		{
+			if (n == v) {return true;}
+		}
+		
+		return false;
+	}
 	
 	//Below methods are just for debugging/visualization
 	
