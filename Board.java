@@ -146,7 +146,7 @@ public class Board {
 				}
 
 				//Last Bead of Turn
-				if (beads == total - 1) //Can be optimized if this is removed from the for loop since it is checking for the last bead every single time
+				if (beads == total - 1) //Can be removed from inside loop but would need to check if the next index is the opposite player's mancala 
 				{
 					//Free Turn Functionality
 					if (currIndex == getPlayerPit(player))
