@@ -146,7 +146,7 @@ public class Board {
 				}
 
 				//Last Bead of Turn
-				if (beads == total - 1) //Can be removed from inside loop but would need to check if the next index is the opposite player's mancala instead 
+				if (beads == total - 1) //Can be removed from inside loop but would need to check if the next index is the opposite player's mancala instead
 				{
 					//Free Turn Functionality
 					if (currIndex == getPlayerPit(player))
@@ -177,12 +177,33 @@ public class Board {
 		}
 		
 		
-		if(gameOver()){
+		if(gameOver())
+		{
             winner();
         }
 		
-		player = nextPlayer(); //When undoing a turn, might have to call this again
+		player = nextPlayer(); 
 		update();
+	}
+	
+	/**
+	 * Sets the board back to the previous turn.
+	 */
+	public void undo() //For Undo Functionality, make button not pressable if prevArray is null
+	{
+		try 
+		{
+			arr = prevArray;
+			prevArray = null; //No multiple undo's in a row allowed. (3 allowed per turn, this might have to be part of the controller to implement
+																	 // or a countUndo instance variable can be implements and reset for each player each turn. 
+			
+			player = nextPlayer(); //Need to call nextPlayer to bring back to the original player who undo'd their turn
+		}
+		
+		catch (Exception e)
+		{
+			System.out.println("Cannot do multiple undo's in a row.");
+		}
 	}
 	
 	/**
@@ -232,7 +253,7 @@ public class Board {
             returnValue = true;
             arr[MANCALA_B] += B;
             
-            for(int i = 7; i < MANCALA_B; i++)
+            for (int i = 7; i < MANCALA_B; i++)
             {
                 arr[i] = 0;
             }
@@ -243,7 +264,7 @@ public class Board {
             returnValue = true;
             arr[MANCALA_A] += A;
             
-            for(int i = 0; i < MANCALA_A; i++)
+            for (int i = 0; i < MANCALA_A; i++)
             {
                 arr[i] = 0;
             }
