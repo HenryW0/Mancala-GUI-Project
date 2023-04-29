@@ -172,15 +172,15 @@ public class Board {
 			{
 				throw new Exception("Cannot choose a player's pit.");
 			}
-
-			if (total == 0)
-			{
-				throw new Exception("No beads in pit.");
-			}
 			
 			if (!contains(getPlayerSide(player), index))
 			{
 				throw new Exception("Cannot choose a pit on your opponents side.");
+			}
+			
+			if (total == 0)
+			{
+				throw new Exception("No beads in pit.");
 			}
 				
 			int currIndex = index + 1; 
@@ -215,6 +215,15 @@ public class Board {
 				arr[currIndex % arr.length] += 1; 
 				beads ++;
 			}
+			
+			if(gameOver())
+			{
+	            winner();
+	        }
+			
+			player = nextPlayer(); 
+			update();
+			
 		}
 				
 		catch (Exception e)
@@ -223,14 +232,6 @@ public class Board {
 			System.out.println();
 		}
 		
-		
-		if(gameOver())
-		{
-            winner();
-        }
-		
-		player = nextPlayer(); 
-		update();
 	}
 	
 	/**
