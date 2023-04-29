@@ -218,8 +218,8 @@ public class Board {
 			
 			if(gameOver())
 			{
-	            winner();
-	        }
+	         		winner();
+	        	}
 			
 			player = nextPlayer(); 
 			update();
