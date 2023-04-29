@@ -82,7 +82,9 @@ public class Board {
 	{
 		if (player == 'A') {return 'B';}
 		
-		else {return 'A';} //if player == 'B'
+		else if (player =='B') {return 'A';} 
+		
+		else {return 'Z';} //Not valid
 	}
 	
 	/**
@@ -94,7 +96,9 @@ public class Board {
 	{
 		if (c == 'A') {return MANCALA_A;}
 		
-		else {return MANCALA_B;} //if c = 'B'
+		else if (c == 'B') {return MANCALA_B;}
+		
+		else {return -1;} //Not Valid
 	}
 	
 	/**
@@ -105,9 +109,52 @@ public class Board {
 	{
 		if (c == 'A') {return PITS_A;}
 		
-		else {return PITS_B;} //if c = 'B'
+		else if (c == 'B') {return PITS_B;} 
+		
+		else {return new int[0];} //Not valid
 	}
 	
+	/**
+	 * Returns the amount of beads in a specific pit given the index
+	 * @param i
+	 * @return
+	 */
+	public int getBeads(int i)
+	{
+		return arr[i];
+	}
+	
+	/**
+	 * Returns the amount of beads in a player's mancala given a character (A or B)
+	 * @param c
+	 * @return
+	 */
+	public int getMancalaPlayer(char c)
+	{
+		if (c == 'A') {return arr[MANCALA_A];}
+		
+		else if (c == 'B') {return arr[MANCALA_B];} 
+		
+		else {return -1;} //Not valid
+	}
+	
+	/**
+	 * Returns the amount of beads in Player A's Mancala
+	 * @return
+	 */
+	public int getMancalaA()
+	{
+		return arr[MANCALA_A];
+	}
+	
+	/**
+	 * Returns the amount of beads in Player B's Mancala
+	 * @return
+	 */
+	public int getMancalaB()
+	{
+		return arr[MANCALA_B];
+	}
 	
 	//Mutators
 	
@@ -230,7 +277,8 @@ public class Board {
 	 * Determines if the game is over based on the rules and current board, if so adds remaining stones to where they belong
 	 * @return
 	 */
-	public boolean gameOver(){
+	public boolean gameOver()
+	{
         boolean returnValue = false;
         int A = 0;
         int B = 0;
