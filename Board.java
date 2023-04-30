@@ -27,6 +27,10 @@ public class Board {
 	private ArrayList<ChangeListener> listeners;
 	private char player;
 	
+	private int countUndo;
+    private int prevCountUndo;
+    private boolean prevFreeTurn;
+	
 	public Board(int beads)
 	{
 		arr = new int[14];
@@ -43,6 +47,10 @@ public class Board {
 		prevArray = null;
 		
 		listeners = new ArrayList<ChangeListener>();
+		
+		prevFreeTurn = false;
+		countUndo = 0;
+        prevCountUndo = 0;
 	}
 	
 	//Accessors
@@ -65,6 +73,11 @@ public class Board {
 		return prevArray;
 	}
 	
+	public int getCountUndo() 
+	{
+        return countUndo;
+    }
+
 	/**
 	 * Returns the current player
 	 * @return
@@ -80,6 +93,8 @@ public class Board {
 	 */
 	public char nextPlayer()
 	{
+		prevCountUndo = countUndo;
+        countUndo = 0;
 		if (player == 'A') {return 'B';}
 		
 		else if (player =='B') {return 'A';} 
@@ -199,6 +214,7 @@ public class Board {
 					if (currIndex == getPlayerPit(player))
 					{
 						player = nextPlayer(); //Call next player since it will be called again after the method ends to return back to this player
+						prevFreeTurn = true;
 					}
 					
 					//Empty Mancala Pit for Last Bead Rule
@@ -211,7 +227,9 @@ public class Board {
 						arr[getPlayerPit(player)] += arr[currIndex % arr.length] + 1; //Add one for last bead
 						arr[currIndex % arr.length] = -1; //Subtract one since last bead is still being added after so remove it by -1 
 						beads ++;
+						prevFreeTurn = false;
 					}
+					
 				}
 				
 				arr[currIndex % arr.length] += 1; 
@@ -246,8 +264,14 @@ public class Board {
 			arr = prevArray;
 			prevArray = null; //No multiple undo's in a row allowed. (3 allowed per turn, this might have to be part of the controller to implement
 																	 // or a countUndo instance variable can be implements and reset for each player each turn. 
+			countUndo = prevCountUndo + 1;
 			
-			player = nextPlayer(); //Need to call nextPlayer to bring back to the original player who undo'd their turn
+			if (!prevFreeTurn)
+			{
+				player = nextPlayer();
+			}
+			
+			update();
 		}
 		
 		catch (Exception e)
