@@ -193,7 +193,7 @@ public class Board {
 				}
 
 				//Last Bead of Turn
-				if (beads == total - 1) //Can be removed from inside loop but would need to check if the next index is the opposite player's mancala instead
+				if (beads == total - 1)
 				{
 					//Free Turn Functionality
 					if (currIndex == getPlayerPit(player))
@@ -208,6 +208,8 @@ public class Board {
 						int opIndex = (12 - currIndex) % arr.length;
 						arr[currIndex % arr.length] += arr[opIndex];
 						arr[opIndex] = 0;
+						arr[getPlayerPit(player)] += arr[currIndex % arr.length] + 1; //Add one for last bead
+						arr[currIndex % arr.length] = -1; //Subtract one since last bead is still being added after so remove it by -1 
 						beads ++;
 					}
 				}
