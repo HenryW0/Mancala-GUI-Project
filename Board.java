@@ -4,14 +4,9 @@ import java.util.Arrays;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-/**
- * Solution for Model Class in MVC pattern for Mancala Project 
- * @author Gary Crabtree and Henry Wahhab
- * @version 1.0 4/8/23
- */
 
 /**
- * Represents the board for a Mancala game 
+ * Represents the board for a Mancala game, acts as the Model in the MVC Pattern
  */
 
 public class Board {
@@ -28,8 +23,8 @@ public class Board {
 	private char player;
 	
 	private int countUndo;
-    private int prevCountUndo;
-    private boolean prevFreeTurn;
+    	private int prevCountUndo;
+    	private boolean prevFreeTurn;
 	
 	public Board(int beads)
 	{
