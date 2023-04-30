@@ -165,12 +165,10 @@ public class Board {
 			System.out.println(getCurrPlayer());
 		
 			prevArray = Arrays.copyOf(arr, arr.length); //For undo functionality
-			int total = arr[index];
-			arr[index] = 0;
 			
 			if (index == MANCALA_A || index == MANCALA_B)
 			{
-				throw new Exception("Cannot choose a player's pit.");
+				throw new Exception("Cannot choose a player's Mancala.");
 			}
 			
 			if (!contains(getPlayerSide(player), index))
@@ -178,12 +176,14 @@ public class Board {
 				throw new Exception("Cannot choose a pit on your opponents side.");
 			}
 			
-			if (total == 0)
+			if (arr[index] == 0)
 			{
 				throw new Exception("No beads in pit.");
 			}
 				
 			int currIndex = index + 1; 
+			int total = arr[index];
+			arr[index] = 0;
 			
 			for (int beads = 0; beads < total; currIndex ++)
 			{
@@ -218,8 +218,8 @@ public class Board {
 			
 			if(gameOver())
 			{
-	         		winner();
-	        	}
+	            winner();
+	        }
 			
 			player = nextPlayer(); 
 			update();
