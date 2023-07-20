@@ -4,9 +4,14 @@ import java.util.Arrays;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+/**
+ * Solution for Board, the Model Class in MVC pattern for Mancala Project 
+ * @author Henry Wahhab, Gary Crabtree, Andrii Vlasiuk
+ * @version 1.0 5/5/23
+ */
 
 /**
- * Represents the board for a Mancala game, acts as the Model in the MVC Pattern
+ * Represents the board for a Mancala game and the Model in the MVC Pattern
  */
 
 public class Board {
@@ -23,9 +28,14 @@ public class Board {
 	private char player;
 	
 	private int countUndo;
-    	private int prevCountUndo;
-    	private boolean prevFreeTurn;
+    private int prevCountUndo;
+    private boolean prevFreeTurn;
 	
+    /**
+     * Constructs a Board object
+     * @param beads - the amount of beads placed into all the pits at the beginning of the game
+     * precondition: beads must be 3 or 4 
+     */
 	public Board(int beads)
 	{
 		arr = new int[14];
@@ -52,7 +62,7 @@ public class Board {
 	
 	/**
 	 * Returns whole board array
-	 * @return
+	 * @return the array containing the number of beads
 	 */
 	public int[] getBoard()
 	{
@@ -61,21 +71,25 @@ public class Board {
 	
 	/**
 	 * Returns the board from the previous turn
-	 * @return
+	 * @return the array containing the number of beads from the previous turn
 	 */
 	public int[] getPreviousBoard()
 	{
 		return prevArray;
 	}
 	
+	/**
+	 * Returns the number of undo clicks this player has made
+	 * @return the number of undo's
+	 */
 	public int getCountUndo() 
 	{
         return countUndo;
     }
 
 	/**
-	 * Returns the current player
-	 * @return
+	 * Returns the current player who is playing this turn
+	 * @return the current player
 	 */
 	public char getCurrPlayer()
 	{
@@ -83,13 +97,23 @@ public class Board {
 	}
 	
 	/**
-	 * Returns the character referring to the next player
-	 * @return
+	 * Returns the character referring to the next player and updates the undo counts
+	 * @return a character corresponding to the next player
 	 */
 	public char nextPlayer()
 	{
 		prevCountUndo = countUndo;
         countUndo = 0;
+        
+		return getNextPlayer();
+	}
+	
+	/**
+	 * Returns the character referring to the next player
+	 * @return a character corresponding to the next player
+	 */
+	public char getNextPlayer()
+	{
 		if (player == 'A') {return 'B';}
 		
 		else if (player =='B') {return 'A';} 
@@ -99,8 +123,8 @@ public class Board {
 	
 	/**
 	 * Returns the index of the mancala pit corresponding to the player character parameter
-	 * @param c
-	 * @return
+	 * @param c - the character representing the player
+	 * @return the index of the players mancala pit
 	 */
 	public int getPlayerPit(char c)
 	{
@@ -113,7 +137,8 @@ public class Board {
 	
 	/**
 	 * Returns the indices of all pits on that side of this player
-	 * @param index
+	 * @param c - the character representing the player
+	 * @return an array of all indices that player has control over
 	 */
 	public int[] getPlayerSide(char c)
 	{
@@ -126,8 +151,9 @@ public class Board {
 	
 	/**
 	 * Returns the amount of beads in a specific pit given the index
-	 * @param i
-	 * @return
+	 * @param i - the index that will be searched
+	 * @return the amount of beads in that index
+	 * precondition: i is a valid index in the board
 	 */
 	public int getBeads(int i)
 	{
@@ -136,8 +162,8 @@ public class Board {
 	
 	/**
 	 * Returns the amount of beads in a player's mancala given a character (A or B)
-	 * @param c
-	 * @return
+	 * @param c - a character representing the player
+	 * @return the amount of beads in the player's mancala pit
 	 */
 	public int getMancalaPlayer(char c)
 	{
@@ -150,7 +176,7 @@ public class Board {
 	
 	/**
 	 * Returns the amount of beads in Player A's Mancala
-	 * @return
+	 * @return the amount of beads that Player A has in their mancala
 	 */
 	public int getMancalaA()
 	{
@@ -159,21 +185,36 @@ public class Board {
 	
 	/**
 	 * Returns the amount of beads in Player B's Mancala
-	 * @return
+	 * @return the amount of beads that Player B has in their mancala
 	 */
 	public int getMancalaB()
 	{
 		return arr[MANCALA_B];
 	}
 	
+	/**
+	 * Returns the previous undo count as an integer
+	 * @return the previous undo count
+	 */
+	public int getPrevCount() 
+	{
+		return prevCountUndo;
+	}
+	
 	//Mutators
 	
+	/**
+	 * Plays the turn out based on the pit the player moves their beads from, follows all of the rules of the game and has undo functionality
+	 * @param index - the index of the pit the player wants to move their beads from
+	 * @throws Exception - depends on the rules that were broken, an exception will be thrown
+	 */
 	public void playTurn(int index)
 	{	
+		
 		try 
 		{
-			System.out.println(getCurrPlayer());
-		
+			//System.out.println(getCurrPlayer());
+			
 			prevArray = Arrays.copyOf(arr, arr.length); //For undo functionality
 			
 			if (index == MANCALA_A || index == MANCALA_B)
@@ -190,14 +231,16 @@ public class Board {
 			{
 				throw new Exception("No beads in pit.");
 			}
-				
+			
 			int currIndex = index + 1; 
 			int total = arr[index];
 			arr[index] = 0;
 			
 			for (int beads = 0; beads < total; currIndex ++)
 			{
-				if (currIndex % arr.length == getPlayerPit(nextPlayer()))
+				prevFreeTurn = false;
+				
+				if (currIndex % arr.length == getPlayerPit(getNextPlayer()))
 				{
 					continue;
 				}
@@ -207,22 +250,24 @@ public class Board {
 				{
 					//Free Turn Functionality
 					if (currIndex == getPlayerPit(player))
-					{
-						player = nextPlayer(); //Call next player since it will be called again after the method ends to return back to this player
+					{ 
 						prevFreeTurn = true;
+						
 					}
 					
 					//Empty Mancala Pit for Last Bead Rule
 					else if (contains(getPlayerSide(player), currIndex) && arr[currIndex % arr.length] == 0) //If the last stone dropped is empty AND on your side
 					{
-						//Put all beads on the opposite player's side into this pit
 						int opIndex = (12 - currIndex) % arr.length;
-						arr[currIndex % arr.length] += arr[opIndex];
-						arr[opIndex] = 0;
-						arr[getPlayerPit(player)] += arr[currIndex % arr.length] + 1; //Add one for last bead
-						arr[currIndex % arr.length] = -1; //Subtract one since last bead is still being added after so remove it by -1 
-						beads ++;
-						prevFreeTurn = false;
+						if (arr[opIndex] != 0)
+						{
+							//Put all beads on the opposite player's side into this pit
+							arr[currIndex % arr.length] += arr[opIndex];
+							arr[opIndex] = 0;
+							arr[getPlayerPit(player)] += arr[currIndex % arr.length] + 1; //Add one for last bead
+							arr[currIndex % arr.length] = -1; //Subtract one since last bead is still being added after so remove it by -1 
+							beads ++;
+						}
 					}
 					
 				}
@@ -231,13 +276,28 @@ public class Board {
 				beads ++;
 			}
 			
+			
+			if (!prevFreeTurn)
+			{
+				player = nextPlayer(); 
+			}
+			
+			//If the previous turn was a free turn and count undo is already 3, make the button unpressable this turn but make the free turn
+			//this player has able to be canceled/undo'd for an addition 3 times
+			if (prevFreeTurn && countUndo == 3)
+			{
+				prevArray = null;
+		        countUndo = 0;
+		        prevCountUndo = 0;
+			}
+			
+			update();
+			
+			
 			if(gameOver())
 			{
 	            winner();
 	        }
-			
-			player = nextPlayer(); 
-			update();
 			
 		}
 				
@@ -257,13 +317,20 @@ public class Board {
 		try 
 		{
 			arr = prevArray;
-			prevArray = null; //No multiple undo's in a row allowed. (3 allowed per turn, this might have to be part of the controller to implement
-																	 // or a countUndo instance variable can be implements and reset for each player each turn. 
-			countUndo = prevCountUndo + 1;
+			prevArray = null; //No multiple undo's in a row allowed. (3 allowed per turn)
+																	 
+			//countUndo = prevCountUndo + 1;
 			
 			if (!prevFreeTurn)
 			{
-				player = nextPlayer();
+				countUndo = prevCountUndo + 1;
+				player = getNextPlayer();
+			}
+			
+			else
+			{
+				prevCountUndo = countUndo;
+				countUndo ++;
 			}
 			
 			update();
@@ -297,7 +364,7 @@ public class Board {
 	
 	/**
 	 * Determines if the game is over based on the rules and current board, if so adds remaining stones to where they belong
-	 * @return
+	 * @return a boolean, true if the game is over, false otherwise
 	 */
 	public boolean gameOver()
 	{
@@ -343,33 +410,40 @@ public class Board {
         return returnValue;
     }
 	
+	/**
+	 * Helper method for printing out/bring up a window with the winner of the game shown, returns a character based on the player who won
+	 * @return a character corresponding to the player
+	 */
 	private char winner()
-	{
-		if(arr[MANCALA_A] > arr[MANCALA_B])
-		{
-			System.out.println("Player A has won!");
-			return 'A';
-		}
-            
+    {
+        if (arr[MANCALA_A] > arr[MANCALA_B])
+        {
+            System.out.println("Player A has won!");
+            GameFrame.winnerPane("A");
+            return 'A';
+        }
+
         else if (arr[MANCALA_A] < arr[MANCALA_B])
         {
-        	System.out.println("Player B has won!");
-        	return 'B';
-        }   
-        	
+            System.out.println("Player B has won!");
+            GameFrame.winnerPane("B");
+            return 'B';
+        }
+
         else
         {
-        	System.out.println("Tie!");
-        	return 'T';
+            System.out.println("Tie!");
+            GameFrame.winnerPane("Tie");
+            return 'T';
         }
-	}
+    }
 	
 	
 	/**
 	 * Helper method to check if an array contains a certain value
-	 * @param a
-	 * @param v
-	 * @return
+	 * @param a - the array to be checked
+	 * @param v - the value to be searched for
+	 * @return boolean whether or not the value was found in the array
 	 */
 	private static boolean contains(int[] a, int v)
 	{
@@ -381,8 +455,12 @@ public class Board {
 		return false;
 	}
 	
-	//Below methods are just for debugging/visualization
+	//Below methods are just for debugging/visualization, they are not needed
 	
+	/**
+	 * Debugging method to show how many mancalas are in each pit
+	 * @return Returns a string that contains the mancalas in the board
+	 */
 	public String toString()
 	{
 		String s = "";
@@ -395,6 +473,9 @@ public class Board {
 		return s;
 	}
 	
+	/**
+	 * Prints out a string that looks like the current mancala board
+	 */
 	public void printBoard()
 	{
 		System.out.print("   ");
